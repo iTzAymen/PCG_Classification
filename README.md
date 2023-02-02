@@ -17,10 +17,14 @@ The data used in this project can be found at the following link:
 
 ## Code
 The code for this project is organized as follows:
-data_preprocessing.py: This script is responsible for preprocessing the data, including splitting the data into train and validation sets, and normalizing the data.
-model.py: This script defines the deep neural network used for PCG classification.
-train.py: This script trains the deep neural network on the preprocessed data.
-evaluate.py: This script evaluates the performance of the trained model on the validation set.
+- **Initialization:** This step involves loading the required packages and setting up the environment.
+- **Preprocessing:** This step involves loading the data, processing it, and preparing it for training.
+- **Training:** This step involves training the deep neural network on the processed data.
+- **Evaluating:** This step involves evaluating the performance of the trained model on the test data.
+- **Custom Models:** The custom models used in this project can be found in the packages directory.
+- **Trained Models:** The `state_dict` of already trained models can be found in the models directory. Note that the file names ending with `_TEMP` are saved as a backup during training in case of any program failure.
+
+The entire project is implemented in PyTorch and can be found in the main.ipynb Jupyter Notebook.
 
 ## Usage
 1. Clone the repository:
@@ -31,7 +35,7 @@ git clone https://github.com/iTzAymen/PCG_Classification.git
 ```bash
 pip install -r requirements.txt
 ```
-3. Run all the cells in `main.ipynb`.
+3. Open the `main.ipynb` and follow the instructions given in the notebook.
 
 ## Results
 The results of the project will be reported here.
