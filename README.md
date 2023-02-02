@@ -12,8 +12,8 @@ This is a project aimed at classifying normal and abnormal heart sounds (PCG) us
 
 ## Data
 The data used in this project can be found at the following link:
-- [PhysioNet 2016 dataset](https://physionet.org/content/challenge-2016/1.0.0/)
-- [PASCAL dataset](https://physionet.org/content/pascal-db/1.0.0/)
+- [PhysioNet 2016 dataset](https://archive.physionet.org/physiobank/database/challenge/2016/)
+- [PASCAL dataset](http://www.peterjbentley.com/heartchallenge/)
 
 ## Code
 The code for this project is organized as follows:
