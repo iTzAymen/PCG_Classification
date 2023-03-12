@@ -58,7 +58,8 @@ class CRNN_a(nn.Module):
         self.cnn = CNN(input_dim)
         self.rnn = RNN(input_size, 64)
         self.fc1 = nn.Linear(1152 + 9984, 32)
-        self.dropout = nn.Dropout(0.5)
+        self.relu1 = nn.ReLU()
+        self.dropout = nn.Dropout(0.2)
         self.fc2 = nn.Linear(32, output_dim)
 
     def forward(self, x):
@@ -66,6 +67,7 @@ class CRNN_a(nn.Module):
         rnn_out = self.rnn(x)
         out = torch.cat([cnn_out, rnn_out], dim=1)
         out = self.fc1(out)
+        out = self.relu1(out)
         out = self.dropout(out)
         out = self.fc2(out)
         return out
