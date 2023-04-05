@@ -74,13 +74,64 @@ class CRNN_a(nn.Module):
 
 
 class CRNN_a_spec(nn.Module):
-    def __init__(self, input_dim, input_size, output_dim):
+    def __init__(self, input_dim, input_size, output_dim, fc_in=6528):
         super(CRNN_a_spec, self).__init__()
         self.cnn = CNN(input_dim)
         self.rnn = RNN(input_size, 64)
-        self.fc1 = nn.Linear(6528, 32)
+        self.fc1 = nn.Linear(fc_in, 32)
         self.relu1 = nn.ReLU()
         self.dropout = nn.Dropout(0.2)
+        self.fc2 = nn.Linear(32, output_dim)
+
+    def forward(self, x):
+        cnn_out = self.cnn(x)
+        print(cnn_out.shape)
+        rnn_out = self.rnn(x)
+        print(rnn_out.shape)
+        out = torch.cat([cnn_out, rnn_out], dim=1)
+        out = self.fc1(out)
+        out = self.relu1(out)
+        out = self.dropout(out)
+        out = self.fc2(out)
+        return out
+
+
+class RNN_b(nn.Module):
+    def __init__(self, input_size, hidden_size=64, n_layers=1, device="cuda:0"):
+        super(RNN_b, self).__init__()
+        self.device = device
+        self.n_layers = n_layers
+        self.hidden_size = hidden_size
+
+        self.maxpool1 = nn.MaxPool2d(2)
+        self.lstm = nn.LSTM(input_size // 2, hidden_size,
+                            n_layers, batch_first=True)
+        self.flatten = nn.Flatten()
+
+    def forward(self, x):
+        # [batch_size, 1, n_mfcc, seq_length]
+        out = x.squeeze(dim=1)
+        # [batch_size, n_mfcc, seq_length]
+        out = out.permute(0, 2, 1)
+        hidden_states = torch.zeros(
+            self.n_layers, out.size(0), self.hidden_size).to(self.device)
+        cell_states = torch.zeros(self.n_layers, out.size(
+            0), self.hidden_size).to(self.device)
+        # [batch_size, seq_length, n_mfcc]
+        out = self.maxpool1(out)
+        out, _ = self.lstm(out, (hidden_states, cell_states))
+        out = self.flatten(out)
+        return out
+
+
+class CRNN_b_spec(nn.Module):
+    def __init__(self, input_dim, input_size, output_dim, fc_in=8576, device="cuda:0", n_layers_rnn=64):
+        super(CRNN_b_spec, self).__init__()
+        self.cnn = CNN(input_dim)
+        self.rnn = RNN_b(input_size, 64, n_layers_rnn, device=device)
+        self.fc1 = nn.Linear(fc_in, 32)
+        self.relu1 = nn.ReLU()
+        self.dropout = nn.Dropout(0.5)
         self.fc2 = nn.Linear(32, output_dim)
 
     def forward(self, x):
@@ -92,3 +143,56 @@ class CRNN_a_spec(nn.Module):
         out = self.dropout(out)
         out = self.fc2(out)
         return out
+
+
+class RNN_c(nn.Module):
+    def __init__(self, input_size, hidden_size=64, n_layers=1, device="cuda:0"):
+        super(RNN_c, self).__init__()
+        self.device = device
+        self.n_layers = n_layers
+        self.hidden_size = hidden_size
+
+        self.lstm = nn.LSTM(input_size, hidden_size,
+                            n_layers, batch_first=True)
+        self.flatten = nn.Flatten()
+
+    def forward(self, x):
+        # [batch_size, 1, n_mfcc, seq_length]
+        out = x.squeeze(dim=1)
+        # [batch_size, n_mfcc, seq_length]
+        out = out.permute(0, 2, 1)
+        hidden_states = torch.zeros(
+            self.n_layers, out.size(0), self.hidden_size).to(self.device)
+        cell_states = torch.zeros(self.n_layers, out.size(
+            0), self.hidden_size).to(self.device)
+        # [batch_size, seq_length, n_mfcc]
+        out, _ = self.lstm(out, (hidden_states, cell_states))
+        out = self.flatten(out)
+        return out
+
+
+class CRNN_c_spec(nn.Module):
+    def __init__(self, input_dim, input_size, output_dim, fc_in=8576, device="cuda:0", n_layers_rnn=64):
+        super(CRNN_c_spec, self).__init__()
+        self.cnn = CNN(input_dim)
+        self.rnn = RNN_c(input_size, 64, n_layers_rnn, device=device)
+        self.fc1 = nn.Linear(fc_in, 32)
+        self.relu1 = nn.ReLU()
+        self.dropout = nn.Dropout(0.5)
+        self.fc2 = nn.Linear(32, output_dim)
+
+    def forward(self, x):
+        cnn_out = self.cnn(x)
+        rnn_out = self.rnn(x)
+        out = torch.cat([cnn_out, rnn_out], dim=1)
+        out = self.fc1(out)
+        out = self.relu1(out)
+        out = self.dropout(out)
+        out = self.fc2(out)
+        return out
+
+
+model = CRNN_a_spec(1, 64, 2)
+tensor = torch.rand([64, 1, 64, 157])
+
+print(model(tensor).shape)
