@@ -192,7 +192,7 @@ class CRNN_c_spec(nn.Module):
         return out
 
 
-model = CRNN_a_spec(1, 64, 2)
-tensor = torch.rand([64, 1, 64, 157])
+# model = CRNN_c_spec(1, 128, 1, fc_in=4160, device='cpu')
+# tensor = torch.rand([128, 1, 128, 51])
 
-print(model(tensor).shape)
+# print(model(tensor).shape)
