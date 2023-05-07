@@ -3,10 +3,13 @@ from torch import nn
 
 
 class CNN(nn.Module):
-    def __init__(self):
+    def __init__(self, in_channels=1):
         super(CNN, self).__init__()
         self.conv1 = nn.Sequential(
-            nn.Conv2d(1, 16, 3), nn.ReLU(), nn.MaxPool2d(2), nn.BatchNorm2d(16)
+            nn.Conv2d(in_channels, 16, 3),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.BatchNorm2d(16),
         )
         self.conv2 = nn.Sequential(
             nn.Conv2d(16, 32, 3), nn.ReLU(), nn.MaxPool2d(2), nn.BatchNorm2d(32)
@@ -156,9 +159,20 @@ class RNN_c(nn.Module):
         self.flatten = nn.Flatten()
 
     def forward(self, x):
-        # [batch_size, 1, n_mfcc, seq_length]
+        # [batch_size, in_channels, n_mfcc, seq_length]
         out = x.squeeze(dim=1)
-        # [batch_size, n_mfcc, seq_length]
+        in_channels = x.shape[1].item()
+        print(in_channels)
+        if in_channels > 1:
+            channel_array = []
+            for i in range(in_channels):
+                channel_data = x[:, i, :, :]
+                print(channel_data.shape)
+                channel_array.append(channel_data)
+            out = torch.cat(channel_array, dim=1)
+            print(out.shape)
+
+        # [batch_size, n_mfcc * in_channels, seq_length]
         out = out.permute(0, 2, 1)
         hidden_states = torch.zeros(self.n_layers, out.size(0), self.hidden_size).to(
             self.device
@@ -166,7 +180,7 @@ class RNN_c(nn.Module):
         cell_states = torch.zeros(self.n_layers, out.size(0), self.hidden_size).to(
             self.device
         )
-        # [batch_size, seq_length, n_mfcc]
+        # [batch_size, seq_length, n_mfcc * in_channels]
         out, _ = self.lstm(out, (hidden_states, cell_states))
         out = self.flatten(out[:, -1, :])
         return out
@@ -179,10 +193,11 @@ class CRNN_c_spec(nn.Module):
         n_classes,
         n_layers_rnn=64,
         fc_in=8576,
+        in_channels=1,
         device="cuda:0",
     ):
         super(CRNN_c_spec, self).__init__()
-        self.cnn = CNN()
+        self.cnn = CNN(in_channels)
         self.rnn = RNN_c(input_size, 64, n_layers_rnn, device=device)
         self.fc1 = nn.Linear(fc_in, 32)
         self.relu1 = nn.ReLU()
@@ -200,9 +215,9 @@ class CRNN_c_spec(nn.Module):
         return out
 
 
-# model = CRNN_c_spec(
-#     input_size=128, n_classes=2, n_layers_rnn=64, fc_in=3648, device="cpu"
-# )
-# tensor = torch.rand([64, 1, 128, 157])
+model = CRNN_c_spec(
+    input_size=32, n_classes=2, n_layers_rnn=64, fc_in=576, device="cpu", in_channels=3
+)
+tensor = torch.rand([64, 3, 14, 157])
 
-# print(model(tensor).shape)
+print(model(tensor).shape)
