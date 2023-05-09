@@ -23,6 +23,31 @@ class CNN(nn.Module):
         return out
 
 
+class CNN_deltaspec(nn.Module):
+    def __init__(self, in_channels=1):
+        super(CNN_deltaspec, self).__init__()
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(in_channels, 16, 3),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.BatchNorm2d(16),
+        )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(16, 32, 3), nn.ReLU(), nn.MaxPool2d(4), nn.BatchNorm2d(32)
+        )
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(32, 64, 3), nn.ReLU(), nn.MaxPool2d(2), nn.BatchNorm2d(64)
+        )
+        self.flatten = nn.Flatten()
+
+    def forward(self, x):
+        out = self.conv1(x)
+        out = self.conv2(out)
+        out = self.conv3(out)
+        out = self.flatten(out)
+        return out
+
+
 class LSTM(nn.Module):
     def __init__(self, input_size, hidden_size=64, n_layers=1, device="cuda:0"):
         super(LSTM, self).__init__()
@@ -67,9 +92,14 @@ class CNNLSTM(nn.Module):
         fc_in=8576,
         in_channels=1,
         device="cuda:0",
+        delta_spec=False,
     ):
         super(CNNLSTM, self).__init__()
-        self.cnn = CNN(in_channels)
+        if delta_spec:
+            self.cnn = CNN_deltaspec(in_channels)
+        else:
+            self.cnn = CNN(in_channels)
+
         self.rnn = LSTM(input_size, 64, n_layers_rnn, device=device)
         self.fc1 = nn.Linear(fc_in, 32)
         self.relu1 = nn.ReLU()
@@ -88,8 +118,14 @@ class CNNLSTM(nn.Module):
 
 
 # model = CNNLSTM(
-#     input_size=42, n_classes=2, n_layers_rnn=64, fc_in=9408, device="cpu", in_channels=3
+#     input_size=384,
+#     n_classes=2,
+#     n_layers_rnn=64,
+#     fc_in=3136,
+#     device="cpu",
+#     in_channels=3,
+#     delta_spec=True,
 # )
-# tensor = torch.rand([64, 3, 14, 157])
+# tensor = torch.rand([64, 3, 128, 157])
 
 # print(model(tensor).shape)
