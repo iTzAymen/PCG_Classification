@@ -24,7 +24,7 @@ The code for this project is organized as follows:
 - **Custom Models:** The custom models used in this project can be found in the packages directory.
 - **Trained Models:** The `state_dict` of already trained models can be found in the models directory. Note that the file names ending with `_TEMP` are saved as a backup during training in case of any program failure.
 
-The entire project is implemented in PyTorch and can be found in the main.ipynb Jupyter Notebook.
+The entire project is implemented in PyTorch and can be found in the main.ipynb or main_preprocessed.ipynb Jupyter Notebook.
 
 ## Usage
 1. Clone the repository:
@@ -35,7 +35,7 @@ git clone https://github.com/iTzAymen/PCG_Classification.git
 ```bash
 pip install -r requirements.txt
 ```
-3. Open the `main.ipynb` and follow the instructions given in the notebook.
+3. Open the `main.ipynb` or `main_preprocessed.ipynb` and follow the instructions given in the notebook.
 
 ## Results
 The results of the project will be reported here.
