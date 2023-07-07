@@ -29,3 +29,5 @@ def getTrainingSet(path='Dataset/PhysioNet'):
 
 def getValidationSet(path='Dataset/PhysioNet'):
     return getOneSet(path + '/validation')
+
+print(getTrainingSet()['classID'].value_counts())
